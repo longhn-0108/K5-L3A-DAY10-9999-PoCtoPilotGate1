@@ -22,6 +22,8 @@
   },
   "legal": {
     "pii_fields_blocked_to_third_party": [
+      "recipient_contact",
+      "customer_note",
       "name",
       "phone",
       "street"
