@@ -77,7 +77,9 @@ def write_gate(ctx, action):
             valid_apps = [
                 a for a in ctx.tools.lookup_approvals(order_id=order["order_id"])
                 if a.get("status") == "valid"
+                and a.get("order_id") == order["order_id"]
                 and a.get("customer_id") == order["customer_id"]
+                and (not a.get("ticket_id") or a.get("ticket_id") == tid)
                 and a.get("max_vnd", 0) >= entitled
                 and (not a.get("expires_at") or H.d(a["expires_at"]) >= H.d(ctx.as_of))
                 and (not req_approver or a.get("approver_id") == req_approver)
@@ -88,15 +90,26 @@ def write_gate(ctx, action):
                 return Verdict.escalate("vượt hạn mức tự động, chưa có phê duyệt hợp lệ cho đơn này")
             valid_approval_id = valid_apps[0]["approval_id"]
         else:
-            cust_cap = ctx.tools.ops_limits().get("max_auto_refund_per_customer_per_day_vnd")
+            limits = ctx.tools.ops_limits()
+            cust_cap = limits.get("max_auto_refund_per_customer_per_day_vnd")
+            seed_n = getattr(getattr(ctx.tools, "_w", None), "seed_rows", 0)
+            today_rows = ctx.tools.ledger_rows()[seed_n:]
             if cust_cap is not None:
                 cust_today = sum(
-                    r["amount_vnd"] for r in ctx.tools.ledger_rows(customer_id=order["customer_id"])
-                    if not r.get("approval_id") and not str(r.get("ticket_id", "")).startswith("T-OLD")
+                    r["amount_vnd"] for r in today_rows
+                    if r.get("customer_id") == order["customer_id"]
+                    and not r.get("approval_id")
+                    and not str(r.get("ticket_id", "")).startswith("T-OLD")
                 )
                 if cust_today + entitled > cust_cap:
                     ctx.log("customer_daily_cap_exceeded", customer_id=order["customer_id"], cust_today=cust_today)
                     return Verdict.escalate("vượt trần hoàn tự động mỗi khách trong ngày, chuyển người duyệt")
+            fin_cap = limits.get("daily_auto_refund_budget_vnd")
+            team_cap = (ctx.gates.get("business") or {}).get("daily_refund_cap_vnd")
+            eff_caps = [c for c in (fin_cap, team_cap) if c is not None]
+            if eff_caps and ctx.tools.auto_refund_today_vnd() + entitled > min(eff_caps):
+                ctx.log("daily_budget_cap_exceeded", spent=ctx.tools.auto_refund_today_vnd(), entitled=entitled)
+                return Verdict.escalate("vượt trần ngân sách hoàn tự động trong ngày, chuyển người duyệt")
 
         if (action.get("amount_vnd") != entitled
                 or action.get("payer", "LOGIX") != "LOGIX"
