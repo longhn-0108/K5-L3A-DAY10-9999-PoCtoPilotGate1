@@ -5,7 +5,7 @@
 - Tên nhóm: 9999
 - Lớp: `L3A`
 - Repo của bàn: `K5-L3A-DAY10-9999-PoCtoPilotGate1`
-- Thẻ sự cố đã bốc (S1–S8):
+- Thẻ sự cố đã bốc (S1–S8): S2
 
 ## Thành viên
 

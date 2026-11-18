@@ -1,6 +1,6 @@
 # Phiếu C · Sự cố và quyết định v2 · Khối 3 (phút 125–200)
 
-**Bàn:** ______ · **Thẻ đã bốc:** ___ *(để trống tới phút 125; bốc số xong thì ghi đúng số đó, ví dụ `S3`. Lab Coach đối chiếu với sổ; lệnh tự kiểm tra in dòng này trong report.)*
+**Bàn:** `K5-L3A-DAY10-9999-PoCtoPilotGate1` · **Thẻ đã bốc:** `S2` *(để trống tới phút 125; bốc số xong thì ghi đúng số đó, ví dụ `S3`. Lab Coach đối chiếu với sổ; lệnh tự kiểm tra in dòng này trong report.)*
 
 Mở `incidents/Sx/card.md` của đúng số đã bốc. Các bước trên thẻ trỏ về đúng mục trong phiếu này. Mục C3 chỉ điền phần ứng với
 số thẻ của bàn; các phần khác để trống.
@@ -133,21 +133,20 @@ Chỗ hai cột lệch nhau chính là nơi đặt gate.
 
 | Dấu hiệu | Có? | Bằng chứng trong thẻ / data |
 |---|---|---|
-| Việc này đụng tới lĩnh vực nhạy cảm: tiền, quan hệ kinh doanh với đối tác | | |
-| Hệ trọng cao và cách làm bằng AI còn mới với người liên quan: họ muốn nắm quyền lúc đầu để xây lòng tin | | |
-| Hệ thống còn lâu mới đạt độ chính xác mong muốn; quyền của con người là biện pháp tạm trong lúc chờ | | |
-| Giới hạn hoặc lỗi của hệ thống cần con người sửa lại | | |
-| Hoàn cảnh thay đổi khiến con người phải "đặt lại" hoặc "tiếp quản" (phê duyệt hết hạn, bị thu hồi; chính sách đổi) | | |
+| Việc này đụng tới lĩnh vực nhạy cảm: tiền, quan hệ kinh doanh với đối tác | Có | S2: `Gốm Bát Tràng Cô Lụa (M-01)` bị trừ `475.000đ` và `3.230.000đ` từ tiền shop (`payer = MERCHANT`) cho đơn giao trễ; cô Lụa gọi khiếu nại 2 lần. |
+| Hệ trọng cao và cách làm bằng AI còn mới với người liên quan: họ muốn nắm quyền lúc đầu để xây lòng tin | Có | Kế toán đối soát `Phạm Kiều Oanh (NV-OANH)` phát hiện các khoản trừ tiền shop và khoản hoàn `3.230.000đ` không có `approval_id`; shop và CSKH cần nắm quyền duyệt các ca ngoại lệ/số tiền lớn. |
+| Hệ thống còn lâu mới đạt độ chính xác mong muốn; quyền của con người là biện pháp tạm trong lúc chờ | Có | Trợ lý bị `checkout_note` / `directive` dẫn hướng làm sai (`llm_extract_note`, `directive_obeyed`), vẫn để lọt khoản chi lớn không có phê duyệt hoặc vượt trần khách/ngày. |
+| Giới hạn hoặc lỗi của hệ thống cần con người sửa lại | Có | Khi đối soát phát hiện trừ nhầm shop hoặc vượt trần `300.000đ/khách/ngày` (`S2-40`..`S2-44`), `NV-OANH` và `NV-HANH` phải trực tiếp hoàn tác công nợ và xử lý thủ công. |
+| Hoàn cảnh thay đổi khiến con người phải "đặt lại" hoặc "tiếp quản" (phê duyệt hết hạn, bị thu hồi; chính sách đổi) | Có | `data/world.json` → `approvals` có mã phê duyệt hết hạn/đã dùng (`A-0031`, `status: "used"`), hoặc các ca vượt `auto_limit_vnd` (`200.000đ`) cần `NV-HANH` cấp phép mới. |
 
 **Bước 2 · Bảng mức kiểm soát**
 
 | Ai (vai, tên trong `staff` nếu có) | Việc / lệnh ghi | Mức kiểm soát họ **cần** (thấp / vừa / cao / chưa rõ) | Mức hệ thống **đang cho** (xem trace) | Lệch? |
 |---|---|---|---|---|
-| | `issue_refund` dưới hạn mức tự động | | | |
-| | `issue_refund` trên hạn mức tự động (S8 chỉ điền dòng này) | | | |
-| | `issue_refund` mà người trả là shop | | | |
-| | nhiều khoản hoàn tự động cho một khách trong ngày | | | |
-| | | | | |
+| `Trần Thị Hạnh (NV-HANH)` — Trưởng ca CSKH | `issue_refund` dưới hạn mức tự động (`<= 200.000đ`, trả bởi `LOGIX`) | **Thấp – Vừa** (tự động thực hiện nếu đúng chính sách + kiểm mẫu theo `review_sampling_pct`) | **Thấp** (tự động ghi sổ nếu hợp lệ) | Không (nếu đúng nguồn sự thật) |
+| `Trần Thị Hạnh (NV-HANH)` — Trưởng ca CSKH | `issue_refund` trên hạn mức tự động (`> 200.000đ`, ví dụ `3.230.000đ`) | **Cao** (bắt buộc dừng chờ `NV-HANH` duyệt trực tiếp và gắn `approval_id` hợp lệ) | **Thấp / Không kiểm soát** ở nhánh lọt qua (cho phép hoàn `3.230.000đ` không có `approval_id`) | **Lệch** → Cổng `write_gate` chuyển `Verdict.escalate` về `NV-HANH` |
+| `Phạm Kiều Oanh (NV-OANH)` — Kế toán đối soát & Shop (`M-01`) | `issue_refund` mà người trả là shop (`payer = "MERCHANT"`) | **Cao** (cấm tuyệt đối tự động trừ tiền shop cho đơn giao trễ; mọi khoản trừ `MERCHANT` phải do kế toán/vận hành đối soát) | **Thấp** (agent tự gán `payer = "MERCHANT"` theo `checkout_note`/`directive` mà không hỏi shop/kế toán) | **Lệch** → Cổng `write_gate` khóa `payer == "LOGIX"` hoặc `Verdict.deny` |
+| `Trần Thị Hạnh (NV-HANH)` & `Lê Thanh Tùng (NV-TUNG)` | nhiều khoản hoàn tự động cho một khách trong ngày (`S2-40`..`S2-44`) | **Cao** (tổng hoàn tự động/khách/ngày vượt `300.000đ` theo `ops_limits` phải chuyển người duyệt) | **Thấp** (chỉ kiểm tra từng ticket đơn lẻ, cho phép 5 khoản hoàn cùng ngày vượt trần `300.000đ`) | **Lệch** → Cổng `write_gate` cộng dồn `ledger` theo `(customer_id, ngày)` và `Verdict.escalate` |
 
 → Mỗi dòng "Lệch" là một nhánh của fault tree và một ứng viên cho gate. Ghi rõ gate **trả quyền về cho ai** (chuyển người
 duyệt, chờ duyệt, trần).
@@ -231,13 +230,14 @@ Mở lại Phiếu B mục B3. Ghi ở đây những dòng đổi so với vòng
 
 *Mục riêng, không ghi đè HAZOP vòng 1 ở Phiếu B mục B4. Năm guideword và nghĩa của chúng: xem Phiếu B mục B4.*
 
-Tool chọn phân tích: `________________`
+Tool chọn phân tích: `issue_refund`
 
 | Tham số / dòng dữ liệu | Guideword (WRONG / INVALID / INCOMPLETE / PERTURBED / INCAPABLE) | Lệch cụ thể (mã ticket, trường dữ liệu của thẻ) | Hậu quả, cho ai | Hiện có gì ngăn? | Gate đề xuất + tầng |
 |---|---|---|---|---|---|
-| | | | | | |
-| | | | | | |
-| | | | | | |
+| `checkout_note` / `ticket` (chữ đi vào `llm_extract_note`) | PERTURBED | Ticket có `checkout_note` hoặc chỉ thị ẩn cài cắm (`S2-04`, `S2-07`): model đọc qua `llm_extract_note` rồi `directive_obeyed`, tự đổi `payer = "MERCHANT"` và hoàn cả đơn (`475.000đ` hoặc `3.230.000đ`). | Shop (`Gốm Bát Tràng Cô Lụa — M-01`) bị trừ tiền oan dù lỗi giao trễ thuộc LogiX; chị Oanh (`NV-OANH`) lệch sổ đối soát. | Cổng vòng 1 có kiểm tra `payer` nhưng cần xác nhận lại nguồn `checkout_note` và trần hoàn lớn. | `pre_guard` + `write_gate` (tầng chặn): bỏ qua mọi chỉ thị từ `checkout_note`, khóa cứng `payer == "LOGIX"` với claim giao trễ. |
+| `approval_id` | INVALID | Khoản hoàn `3.230.000đ` vượt `auto_limit_vnd = 200.000đ` nhưng `approval_id` là `null`, hết hạn (`expires_at < as_of`), đã dùng (`status == "used"`), hoặc sai `order_id` (`S2-20`). | Tiền lớn rời sổ cái không có phê duyệt hợp lệ của `NV-HANH`, rủi ro thất thoát tài chính nghiêm trọng. | `write_gate` kiểm tra bảng `approvals` trước `issue_refund`. | `write_gate` (tầng chặn + chuyển người): vượt `auto_limit_vnd` mà thiếu `approval` hợp lệ của `NV-HANH` → `Verdict.escalate`. |
+| `customer_daily_refund_vnd` (tổng hoàn theo `customer_id` trong ngày) | WRONG | Một khách gửi liên tiếp 5 ticket hợp lệ trong cùng ngày (`S2-40` … `S2-44`), mỗi ticket dưới `200.000đ` nhưng tổng cộng vượt `ops_limits.max_auto_refund_per_customer_per_day_vnd = 300.000đ`. | Lách trần tự động từng đơn, tổng chi cho 1 khách vượt hạn mức ngày mà không có người duyệt. | Chưa có bộ đếm tổng hoàn tự động trong ngày theo `customer_id` (hoặc cần kiểm tra lại nhánh này). | `write_gate` (tầng giới hạn thiệt hại): cộng dồn `ledger_rows` của cùng `customer_id` trong ngày; nếu `sum + amount_vnd > 300000` → `Verdict.escalate`. |
+| `ledger` / `merchant_id` (đơn tách nhiều khoản hoặc lỗi đồng bộ sổ cái) | INCAPABLE | Trong giờ cao điểm hoặc khi 2 yêu cầu của cùng shop/khách chạy nối tiếp mà sổ cái `ledger` chưa đồng bộ kịp *(nhánh chưa thấy trên trace lúc viết)*. | Có nguy cơ chi vượt trần ngày hoặc trừ nhầm shop nếu fallback bỏ qua kiểm tra sổ cái (`fail_open`). | Chưa có cơ chế fail-closed khi không đọc được `ledger` / `approvals`. | `write_gate` (tầng chặn an toàn): không đọc được `ledger`/`approvals` thì `Verdict.escalate` (fail-closed, không tự động chi tiền). |
 
 Bắt buộc: ít nhất ba dòng, trong đó **một dòng là nhánh bàn chưa thấy trên trace** lúc viết.
 
