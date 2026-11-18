@@ -6,9 +6,9 @@
 
 ## Đặt tên repo
 
-| Loại | Tên | Ghi chú |
-|---|---|---|
-| Repo đề (repo mẫu) | `K5_L3_Day10_PoC-to-Pilot_Gate1_student` | Không push lên repo này |
+| Loại                    | Tên                                             | Ghi chú                                                                                                                    |
+| ------------------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Repo đề (repo mẫu)    | `K5_L3_Day10_PoC-to-Pilot_Gate1_student`       | Không push lên repo này                                                                                                  |
 | Repo bài nộp của bàn | `K5-<L3A\|L3B>-DAY10-<TenNhom>-PoCtoPilotGate1` | Ví dụ `K5-L3A-DAY10-NhomSao-PoCtoPilotGate1`. `TenNhom` không dấu, không khoảng trắng, không thêm chữ `Lop` |
 
 Tên theo quy ước chung của khóa: `Kn-L3{A|B}-DAYxx-TenNhom-TenBai`. Với lab này, `TenBai` là `PoCtoPilotGate1`. Dòng cuối của lệnh 7 còn in dạng tên cũ (`K5_Day10_3A_…`). Không dùng dạng đó. Đặt tên repo theo dạng trong bảng trên. Giá trị `team` trong `config/acceptance_criteria.json` và `submission/submission.json` phải **giống hệt** tên repo.
@@ -17,14 +17,14 @@ Tên theo quy ước chung của khóa: `Kn-L3{A|B}-DAYxx-TenNhom-TenBai`. Với
 
 Bài nộp là thư mục `submission/` do lệnh 7 gom, cùng với `TEAM.md`. Danh sách đầy đủ từng file: [`submission/README.md`](submission/README.md#bài-nộp-gồm-gì).
 
-| Thành phần | Ở đâu | Ai làm |
-|---|---|---|
-| Ba phiếu A, B, C | `templates/form-*.md` → lệnh 7 chép vào `submission/docs/` | Cả bàn |
-| Tiêu chí đã ký + hash | `config/acceptance_criteria.json`, `.lock` | Sản phẩm và kinh doanh |
-| Cổng vòng 1 (bản chốt) và vòng 2 | `lab10/guards.py`, `lab10/monitors.py`, `config/operating_gates.json` | Kỹ sư cổng · Vận hành và pháp lý |
-| Report ba mốc, nhật ký lần chạy | lệnh 6 và lệnh 7 tự tạo | Kỹ sư cổng |
-| `submission/submission.json` | `members` ghi dạng `"HoVaTen-MSSV"`, ví dụ `"NguyenVanAn-20241234"` | Vận hành và pháp lý |
-| `TEAM.md` | Bảng thành viên và mục cá nhân của **từng** người | Trưởng nhóm + từng thành viên |
+| Thành phần                           | Ở đâu                                                                     | Ai làm                                   |
+| -------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------- |
+| Ba phiếu A, B, C                      | `templates/form-*.md` → lệnh 7 chép vào `submission/docs/`           | Cả bàn                                  |
+| Tiêu chí đã ký + hash             | `config/acceptance_criteria.json`, `.lock`                               | Sản phẩm và kinh doanh                 |
+| Cổng vòng 1 (bản chốt) và vòng 2 | `lab10/guards.py`, `lab10/monitors.py`, `config/operating_gates.json`  | Kỹ sư cổng · Vận hành và pháp lý |
+| Report ba mốc, nhật ký lần chạy   | lệnh 6 và lệnh 7 tự tạo                                                 | Kỹ sư cổng                             |
+| `submission/submission.json`         | `members` ghi dạng `"HoVaTen-MSSV"`, ví dụ `"NguyenVanAn-20241234"` | Vận hành và pháp lý                  |
+| `TEAM.md`                            | Bảng thành viên và mục cá nhân của **từng** người           | Trưởng nhóm + từng thành viên       |
 
 ## Nơi nộp
 
@@ -43,8 +43,8 @@ Commit sau hạn chót không được tính; team chấm lấy commit cuối c�
 
 ## Checklist
 
-- [ ] Repo của bàn đúng tên `K5-<L3A|L3B>-DAY10-<TenNhom>-PoCtoPilotGate1`, đã mời team chấm.
-- [ ] `TEAM.md` có đủ họ tên, MSSV, vai của mọi thành viên và mục `## HoVaTen-MSSV` của từng người.
+- [X] Repo của bàn đúng tên `K5-<L3A|L3B>-DAY10-<TenNhom>-PoCtoPilotGate1`, đã mời team chấm.
+- [X] `TEAM.md` có đủ họ tên, MSSV, vai của mọi thành viên và mục `## HoVaTen-MSSV` của từng người.
 - [ ] Tiêu chí đã ký, commit và push **trước** lần đánh giá đầu tiên.
 - [ ] Đã chốt cổng vòng 1 (lệnh 5) trước phút 115.
 - [ ] Ba phiếu A, B, C đã điền **mọi mục** (A1–A5, B0–B8, C0–C12); dòng `Thẻ đã bốc:` đúng số thẻ. Lệnh 7 báo tên mục còn nguyên mẫu. Bàn bốc thẻ S4 không cần điền C3.
