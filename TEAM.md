@@ -46,3 +46,26 @@ Vai **Kỹ sư cổng** kiêm **Trưởng nhóm**: thiết lập repo & nhánh u
 
 - **Một điều học được:** Mọi văn bản đi vào LLM (không chỉ `ticket.text` khách gõ mà cả các trường dữ liệu trong DB như `orders.checkout_note`) đều là dữ liệu không đáng tin cậy; vì vậy các bất biến an toàn về tiền bạc, bên chịu phí (`payer`) và hạn mức phê duyệt bắt buộc phải được cưỡng chế bằng cổng code tất định (`write_gate`) đối chiếu trực tiếp với nguồn sự thật ngoài model, nhờ đó cổng Vòng 1 đã chặn đứng 100% sự cố `S2` ngay từ mốc `prepared`.
 - **Một điều còn chưa chắc:** Khi ra môi trường production thực tế với lưu lượng lớn và hành vi gian lận tạo nhiều tài khoản (`customer_id` khác nhau nhưng cùng SĐT/địa chỉ nhận hàng), việc chỉ khóa trần `300.000đ/customer_id/ngày` trong `write_gate` sẽ cần kết hợp thêm định danh thực thể (entity resolution theo SĐT/tài khoản ngân hàng/địa chỉ) mà không làm tăng độ trễ xử lý của từng ticket.
+
+## LeAnhSon-2A202603440
+
+### Phần việc phụ trách
+
+Vai **Vận hành và pháp lý**: điền Câu `1.2` và `1.4` (Telemetry production) trên Phiếu A (`A1`, `A2`); thiết lập mục `operations` và `legal` trong `config/operating_gates.json`; hoàn thành `B4` (HAZOP vòng 1), `B5` (Checklist 9 nhóm việc lần 1), `B7.5` (Runbook phần 1–3) và `B7.6` (Giờ cao điểm) trên Phiếu B; xử lý thẻ sự cố `S2` ở mục `C3.1` (Mức kiểm soát của con người), `C4` (HAZOP của thẻ `S2`), `C10` (Risk register) và `C11` (Cập nhật checklist & Runbook phần 4–5) trên Phiếu C.
+
+### Đóng góp cụ thể
+
+- Cấu hình các cổng vận hành và pháp lý trong `config/operating_gates.json` dựa trên `data/world.json`: chỉ định `pic = "NV-TUNG"`, `approver_id = "NV-HANH"`, `reviewers_on_shift = 1`, `review_capacity_per_hour = 6`, `max_queue_wait_minutes = 60`, khóa chặn PII sang bên thứ ba (`pii_fields_blocked_to_third_party`) và bật `carrier_fault_requires_recorded_cause = true`.
+- Thực hiện HAZOP vòng 1 trên `file_carrier_fault` kèm 3 nhánh mở rộng ngoài kỹ thuật (Người duyệt, Dữ liệu gửi bên thứ ba, Ngân sách) và viết Runbook 1–3 cùng kịch bản Giờ cao điểm (B7.5–B7.6).
+- Phân tích mức kiểm soát của con người (`C3.1`) và HAZOP `issue_refund` (`C4`) cho thẻ sự cố `S2`, đồng thời cập nhật Risk register (`C10`), Checklist 9 nhóm và Runbook phần 4–5 (`C11`) để xử lý sự cố trừ tiền `MERCHANT` và lách trần hoàn `300.000đ/khách/ngày`.
+
+### Bằng chứng
+
+- File cấu hình: `config/operating_gates.json` (mục `operations`, `legal`).
+- Các mục trên phiếu: Phiếu A (`A1` câu 1.2, `A2` câu 1.4), Phiếu B (`B4`, `B5`, `B7.5`, `B7.6`), Phiếu C (`C3.1`, `C4`, `C10`, `C11`).
+- Đối chiếu mã lần chạy: `R-base-prepared-20261118-160026-304c70` (Vòng 1) và `R-S2-grade-20261118-163529-305bfb` (Vòng 2, `PASS-VISIBLE`).
+
+### Exit ticket
+
+- **Một điều học được:** An toàn với bên thứ ba (shop `MERCHANT`, hãng vận chuyển, người nhận quà) không thể chỉ dựa vào lời khai trong ticket hay trường `checkout_note`, mà cần kết hợp cổng kỹ thuật tất định với phân định rõ thẩm quyền phê duyệt của con người (`NV-HANH`, `NV-OANH`) và quy trình dừng khẩn cấp trong Runbook.
+- **Một điều còn chưa chắc:** Khi triển khai pilot thật và bật kiểm mẫu hoặc vào giờ cao điểm thực tế, lượng ca chuyển cho `NV-HANH` duyệt thủ công có vượt ngưỡng 6 ca/giờ buộc phải tăng `reviewers_on_shift` lên 2 hay không.
