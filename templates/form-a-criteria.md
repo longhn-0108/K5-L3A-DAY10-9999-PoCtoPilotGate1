@@ -24,8 +24,8 @@ rồi mới chạy đánh giá. Khối 1 không sửa code.
 
 ### Câu 1.2 · Mục tiêu nhìn từ hai người
 
-- Chị Oanh, kế toán đối soát (không dùng trợ lý, nhưng phải khớp sổ với hãng và shop mỗi tuần): …
-- Chị Hạnh, trưởng ca CSKH (phải duyệt những ca trợ lý chuyển sang): …
+- Chị Oanh, kế toán đối soát (không dùng trợ lý, nhưng phải khớp sổ với hãng và shop mỗi tuần): Sổ cái hoàn tiền và bảng phạt hãng cuối tuần phải khớp 100% chứng từ thực tế — không có khoản hoàn sai (`wrongful_refund_vnd = 0`), không trừ nhầm tiền của shop (`MERCHANT`), và không ghi lỗi oan cho hãng vận chuyển (`wrongful_carrier_faults = 0`) gây tranh chấp công nợ 80.000đ–150.000đ/lỗi.
+- Chị Hạnh, trưởng ca CSKH (phải duyệt những ca trợ lý chuyển sang): Tỉ lệ chuyển người nằm trong sức duyệt của ca trực (`escalation_rate <= 0.35`, năng lực 6 ca/giờ/người) để không có ca nào bị ùn quá SLA 60 phút (`queue_stuck = 0`), đồng thời các ca chuyển sang phải ghi rõ lý do và đúng người duyệt đứng tên (`NV-HANH`) để duyệt nhanh không cần dò lại từ đầu.
 
 ---
 
@@ -48,12 +48,12 @@ trợ lý có đang gây thiệt hại cho bên ngoài LogiX không; không có 
 
 | | Offline, cho MỘT bước (câu 1.3) | Telemetry production (câu 1.4) |
 |---|---|---|
-| **Bước / hành vi được đo** | | |
-| **Thước đo** (một câu, có đơn vị) | | |
-| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | | |
-| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | | |
-| **Khung thời gian / ngưỡng báo động** | (không áp dụng) | |
-| **Điểm mù** (thước đo này KHÔNG thấy gì) | | |
+| **Bước / hành vi được đo** | | Hành vi gây tác động bên ngoài LogiX: ghi lỗi hãng (`file_carrier_fault`) và gửi thông báo cho hãng (`notify_carrier`) khi chạy thật. |
+| **Thước đo** (một câu, có đơn vị) | | Tỉ lệ ca bị hãng vận chuyển khiếu nại sai lỗi và số vụ cảnh báo rò rỉ dữ liệu cá nhân (PII) sang bên thứ ba (đơn vị: % trên tổng lệnh ghi lỗi hãng và số vụ/tuần). |
+| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | | Nhật ký lệnh `file_carrier_fault` & `notify_carrier` đối chiếu với phiếu phản hồi/đối soát công nợ tuần từ 5 hãng (`GHSH`, `VNX`, `LGX`, `MKD`, `DNB`) do chị Oanh (`NV-OANH`) tổng hợp và kết quả kiểm mẫu CSKH; không có nhãn sẵn lúc chạy. |
+| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | | `(Số lệnh file_carrier_fault bị hãng khiếu nại đúng là sai trong 7 ngày) / (Tổng số lệnh file_carrier_fault phát sinh trong tuần)`; các ca hãng chưa phản hồi hoặc thiếu chứng từ tạm tách khỏi tử số và đưa vào danh sách theo dõi riêng; sự cố PII đếm theo số vụ tuyệt đối. |
+| **Khung thời gian / ngưỡng báo động** | (không áp dụng) | Theo dõi theo ngày, chốt đối soát mỗi 7 ngày; **Báo động Đỏ** khi có ≥ `1` vụ lộ PII hoặc ≥ `2` ca bị hãng khiếu nại sai lỗi trong 7 ngày (đặc biệt với hãng giới hạn 3 lỗi/7 ngày như `GHSH`, `DNB`). |
+| **Điểm mù** (thước đo này KHÔNG thấy gì) | | Không thấy các ca trợ lý **bỏ sót** không ghi lỗi hãng dù hãng giao trễ thật, cũng như các ca rò rỉ PII nhưng bên thứ ba không phản ánh lại trong tuần. |
 
 **Ví dụ mẫu (bước "chọn độ trễ" của agent, đừng chép):**
 Thước đo: tỉ lệ lần chạy mà độ trễ agent dùng để tính tiền khác độ trễ theo tracking DB. Dữ liệu: sự kiện `proposal.delay_days_used`
