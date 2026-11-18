@@ -69,3 +69,26 @@ Vai **Vận hành và pháp lý**: điền Câu `1.2` và `1.4` (Telemetry produ
 
 - **Một điều học được:** An toàn với bên thứ ba (shop `MERCHANT`, hãng vận chuyển, người nhận quà) không thể chỉ dựa vào lời khai trong ticket hay trường `checkout_note`, mà cần kết hợp cổng kỹ thuật tất định với phân định rõ thẩm quyền phê duyệt của con người (`NV-HANH`, `NV-OANH`) và quy trình dừng khẩn cấp trong Runbook.
 - **Một điều còn chưa chắc:** Khi triển khai pilot thật và bật kiểm mẫu hoặc vào giờ cao điểm thực tế, lượng ca chuyển cho `NV-HANH` duyệt thủ công có vượt ngưỡng 6 ca/giờ buộc phải tăng `reviewers_on_shift` lên 2 hay không.
+
+## NguyenQuangHiep-2A202603509
+
+### Phần việc phụ trách
+
+Vai **Sản phẩm và kinh doanh**: thiết lập tiêu chí nghiệm thu Vòng 1 tại Phiếu A (`A1` câu 1.1, `A2` câu 1.3 và 1.4 cho các ngưỡng kinh doanh, `A3` ngưỡng đi tiếp, `A4` quy tắc quyết định) và điền `config/acceptance_criteria.json`; cấu hình khối `business` trong `config/operating_gates.json`; hoàn thành các mục `B3` (bảng dò 5 con số trong `data/world.json`), `B5` (checklist các nhóm kinh doanh và quyết định), `B6` (hành trình 1 ticket qua 4 tầng) và `B7.4` (ngân sách và phạm vi) trên Phiếu B; phân tích `C5` (Specification và giả định môi trường cho thẻ `S2`), cập nhật dòng quyết định ở `C11`, chốt quyết định Gate 1 cột `v2` cùng ba dòng bắt buộc tại `C12` trên Phiếu C và hoàn thiện `submission/submission.json`.
+
+### Đóng góp cụ thể
+
+- Xác định và khóa bộ ngưỡng nghiệm thu trong `config/acceptance_criteria.json` (ký tại commit `473ed33`, hash `620ff5ff`) cùng cấu hình kinh doanh trong `config/operating_gates.json`: `daily_refund_cap_vnd = 1500000`, `cost_budget_per_ticket_vnd = 1200`, `roi_min = 0.25` và phạm vi `pilot_scope` toàn bộ 4 kho (`HN, HCM, DN, CT`).
+- Đối chiếu số liệu tài chính và phân khúc kho/hãng giữa các mốc `base`, `prepared` và `after` trên bộ nền và thẻ sự cố `S2` (chứng minh cổng chặn hoàn toàn `32.750.000đ` trừ tiền shop oan và `33.580.000đ` hoàn sai, giữ chi phí `4.660đ/ticket <= 8.000đ`, `ROI = 1.15 >= 0.25`, tổng hoàn tự động ngày `282.000đ <= 1.500.000đ`), từ đó viết mục `C5`, chốt quyết định `v2 = Tiếp tục` ở `C12` và đồng bộ sang `submission/submission.json`.
+- Sử dụng trợ lý AI để hỗ trợ tra cứu nhanh cấu trúc dữ liệu trong `data/world.json`, kiểm tra độ khớp số liệu giữa các file `report.json` và biên tập văn phong trên Phiếu A, B, C (toàn bộ ngưỡng kinh doanh, quy tắc quyết định và lựa chọn Gate 1 đều do cá nhân và nhóm tự tính toán, kiểm chứng).
+
+### Bằng chứng
+
+- Commit tiêu chí và cổng Vòng 1: `6525256` (Phiếu A và `acceptance_criteria.json`), `473ed33` (`Sign acceptance criteria`, hash `620ff5ff`), `87b166f` (cấu hình `business` trong `operating_gates.json` và Phiếu B).
+- Mã lần chạy đối chiếu: Vòng 1 (`R-base-before-20261118-152020-8fc71e`, `R-base-prepared-20261118-160026-304c70`) và Vòng 2 trên thẻ `S2` (`R-S2-before-20261118-163158-304c70`, `R-S2-prepared-20261118-163158-304c70`, `R-S2-after-20261118-163530-305bfb`, `R-S2-grade-20261118-163529-305bfb`).
+- Các mục trên phiếu và bài nộp: Phiếu A (`A1`–`A5`), Phiếu B (`B3`, `B5`, `B6`, `B7.4`), Phiếu C (`C5`, `C11` nhóm 9, `C12`), `submission/submission.json`.
+
+### Exit ticket
+
+- **Một điều học được:** Một hệ thống AI có thể đạt tỉ lệ qua bài và ROI rất tốt trên bộ kiểm thử nền nhưng vẫn gây thiệt hại tài chính nghiêm trọng cho đối tác (`32,75 triệu đồng` trừ nhầm vào tài khoản shop trên thẻ `S2`) nếu chỉ kiểm tra hạn mức từng đơn lẻ mà thiếu cổng cưỡng chế nguồn tiền (`payer = LOGIX`) và trần lũy kế theo khách hàng/ngày (`300.000đ/khách/ngày`).
+- **Một điều còn chưa chắc:** Trong giai đoạn pilot thật sắp tới, khi khách hàng biết tới ngưỡng hoàn tự động `200.000đ/đơn` và trần `300.000đ/khách/ngày`, hành vi chia nhỏ đơn qua nhiều tài khoản sẽ làm tăng bao nhiêu phần trăm khối lượng ca `escalate` sang `NV-HANH` và ảnh hưởng thế nào tới `cost_per_ticket_vnd` ở kho `DN` (nơi đang có chi phí cao nhất là `4.916đ/ticket`).

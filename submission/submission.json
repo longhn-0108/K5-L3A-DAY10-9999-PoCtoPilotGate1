@@ -1,12 +1,16 @@
 {
-  "team": "",
-  "members": [],
-  "incident": "",
-  "decision_v1": "",
-  "decision_v2": "",
+  "team": "K5-L3A-DAY10-9999-PoCtoPilotGate1",
+  "members": [
+    "HoangNguyenLong-2A202603476",
+    "LeAnhSon-2A202603440",
+    "NguyenQuangHiep-2A202603509"
+  ],
+  "incident": "S2",
+  "decision_v1": "Tiếp tục",
+  "decision_v2": "Tiếp tục",
   "three_lines": {
-    "environment_assumption": "",
-    "reduce_or_prevent": "",
-    "measure_in_pilot": ""
+    "environment_assumption": "Thiết kế đang dựa vào giả định rằng dữ liệu gốc trong cơ sở dữ liệu nội bộ (bảng orders, parcels, approvals) là chính xác và mỗi khách hàng chỉ dùng một tài khoản (customer_id duy nhất), nhưng ngoài thực tế một cá nhân có thể tạo nhiều tài khoản khác nhau (trùng số điện thoại hoặc địa chỉ nhận hàng) để nhận hoàn tự động dưới 300.000đ trên mỗi tài khoản nhằm lách trần lũy kế ngày.",
+    "reduce_or_prevent": "Gate write_gate trong lab10/guards.py NGĂN HẲN tác hại chèn chỉ thị từ ticket.text và checkout_note đòi hoàn lố, trừ tiền shop (payer=MERCHANT) hoặc lách phê duyệt NV-HANH trên cùng một customer_id vì cổng tính lại số tiền hoàn trực tiếp từ DB bằng code tất định, nhưng chỉ GIẢM khả năng lạm dụng ngân sách ngoài đời thật nếu người dùng chia nhỏ đơn qua nhiều tài khoản customer_id khác nhau.",
+    "measure_in_pilot": "Trong tuần pilot thật đầu tiên trước Bước đánh giá 2, đội cần đo lại trên lưu lượng thật: tỉ lệ cảnh báo directive_and_cap_anomaly_rate theo từng giờ, chi phí LLM thực tế trên mỗi ticket khi có checkout_note dài, thời gian chờ duyệt thực tế của NV-HANH vào khung giờ cao điểm (11h-13h, 20h-22h) và tỉ lệ trùng số điện thoại hoặc địa chỉ nhận hàng giữa các customer_id nhận hoàn tự động trong ngày."
   }
 }
